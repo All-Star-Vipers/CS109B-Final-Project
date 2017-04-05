@@ -2,7 +2,7 @@
 
 ## Notebook
 
-* *Milestone 1 - Submission* is an ipython notebook detailing steps completed for Milestone 1, including all data visualizations
+* **Milestone 1 - Submission** is an ipython notebook detailing steps completed for Milestone 1, including all data visualizations
 
 ## Scripts
 
