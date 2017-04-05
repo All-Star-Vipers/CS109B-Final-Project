@@ -19,7 +19,7 @@ def get_response(movie_id, index, total):
 		print("Error")
 		values = None
 	print("{0} out of {1} | {2:.2f}% Complete".format(index, total, index*1./total * 100))
-	return values
+	return (status_code, values)
 
 def get_data(popular_movies_filepath, detailed_movies_filepath):
 	df_popular = pd.read_csv(popular_movies_filepath)
@@ -34,8 +34,8 @@ def get_data(popular_movies_filepath, detailed_movies_filepath):
 	while len(ids_to_pull) > 0:
 		movie_id = ids_to_pull[0]
 		start_time = time.time()
-		values = get_response(movie_id, counter , total)
-		if values:
+		status_code, values = get_response(movie_id, counter , total)
+		if values and status_code != 404:
 			values['id'] = movie_id
 			values['movie_status_code'] = 200
 			values['overview'] = [values['overview']]
