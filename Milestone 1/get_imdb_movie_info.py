@@ -10,7 +10,7 @@ from imdb import IMDb
 def get_response(movie_id, index, total):
 	ia = IMDb()
 	#try:
-	values = ia.get_movie(movie_id.replace('/',''))
+	values = ia.get_movie(movie_id)
 	print(len(values.keys()))
 	#except:
 	#	print("Error")
@@ -21,14 +21,14 @@ def get_response(movie_id, index, total):
 def get_data(tmdb_filepath, imdb_filepath):
 	df_popular = pd.read_csv(tmdb_filepath)
 	try:
-		df = pd.read_csv(imdb_filepath)
+		df = pd.read_table(imdb_filepath, sep = ',', error_bad_lines = False)
 		ids_to_pull = list(set(df_popular['imdb_id']) - set(df['imdb_id']))
 	except IOError:		
 		df = pd.DataFrame({})
 		ids_to_pull = df_popular['imdb_id'].tolist()
 	total = len(ids_to_pull)
 	counter = 1
-	values_to_list = ['canonical title', 'long imdb canonical title', 'long imdb title', 'smart canonical title', 'smart long imdb canonical title', 'title', 'plot outline']
+	values_to_list = ['smart canonical episode title', 'canonical episode title', 'episode title', 'long imdb episode title', 'canonical title', 'long imdb canonical title', 'long imdb title', 'smart canonical title', 'smart long imdb canonical title', 'title', 'plot outline']
 	people_keys = ['producer', 'director', 'cinematographer', 'miscellaneous crew','production companies', 'writer', 'cast', 'editor']
 	while len(ids_to_pull) > 0:
 		movie_id = ids_to_pull[0]
@@ -50,10 +50,13 @@ def get_data(tmdb_filepath, imdb_filepath):
 		else:
 			imdb_dict = {'imdb_id' : movie_id}
 		df = df.append([imdb_dict])
-		#for column in df.columns:
-		#	print(column)
-		#	df[column].astype(str)
-		df.to_csv(imdb_filepath, index =False)
+		try:
+			df.to_csv(imdb_filepath, index =False)
+		except:
+			for column in df.columns:
+				print(column)
+				df[column].astype(str)
+			break
 		ids_to_pull.remove(movie_id)
 		counter = counter + 1
 		end_time = time.time()
