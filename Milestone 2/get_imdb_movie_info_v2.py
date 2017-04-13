@@ -26,11 +26,11 @@ def get_data(tmdb_filepath, imdb_filepath):
 	counter = 1
 	departments = ['animation department', 'art department', 'camera and electrical department', 'cast', 'casting department','costume department', 'distributors',
 	'editorial department', 'makeup', 'music department', 'special effect department', 'visual effects']
-	text = ['genres', , 'mpaa', 'plot', 'plot outline', 'title']
-	numbers = ['rating','votes','imdb_id']
+	text = ['mpaa', 'plot outline', 'title']
+	numbers = ['rating','votes','imdb_id', 'genres', 'plot']
 	while len(ids_to_pull) > 0:
 		movie_id = ids_to_pull[0]
-		start_time = time.time()
+		#start_time = time.time()
 		values = get_response(movie_id, counter , total)
 		print(values)
 		imdb_dict = {}
@@ -52,8 +52,8 @@ def get_data(tmdb_filepath, imdb_filepath):
 		df.to_csv(imdb_filepath, index =False)
 		ids_to_pull.remove(movie_id)
 		counter = counter + 1
-		end_time = time.time()
-		time.sleep(max(.25 - (end_time - start_time), 0))
+		#end_time = time.time()
+		#time.sleep(max(.25 - (end_time - start_time), 0))
 	print(df['movie_status_code'].value_counts())
 	print(df['movie_status_code'].isnull().sum())
 	print("Complete")
