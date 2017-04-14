@@ -27,7 +27,7 @@ def get_data(tmdb_filepath, imdb_filepath):
 	departments = ['animation department', 'art department', 'camera and electrical department', 'cast', 'casting department','costume department', 'distributors',
 	'editorial department', 'makeup', 'music department', 'special effect department', 'visual effects']
 	text = ['mpaa', 'plot outline', 'title']
-	numbers = ['rating','votes','imdb_id', 'genres', 'plot']
+	numbers = ['rating','votes', 'genres', 'plot']
 	while len(ids_to_pull) > 0:
 		movie_id = ids_to_pull[0]
 		#start_time = time.time()
@@ -36,6 +36,7 @@ def get_data(tmdb_filepath, imdb_filepath):
 		imdb_dict = {}
 		if values:
 			imdb_dict['movie_status_code'] = True
+			imdb_dict['imdb_id'] = movie_id
 			for department in departments: 
 				if department in values.keys():
 					imdb_dict[department] = len(values[department])
