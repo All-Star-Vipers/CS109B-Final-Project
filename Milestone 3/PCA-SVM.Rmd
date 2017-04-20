@@ -1,0 +1,191 @@
+---
+title: "PCA and SVM with posters"
+author: "James Fallon, Tyler Finkelstein, Aaron Myran, Ihsaan Patel"
+date: "April 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+# For guidance, see CS109B Lab 5: Principal Components and Multidimensional Scaling and Midterm II
+
+# Install imager package if necessary on first run
+#install.packages("imager")
+## For Mac you need to install XQuartz for imager to work
+
+library(imager)
+library(cluster)
+library(ggplot2)
+library(e1071)
+
+options(mc.cores = parallel::detectCores() - 1, digits = 4)
+knitr::opts_knit$set(root.dir = "/Users/James/Dropbox/Posters")
+```
+
+```{r load and prepare poster data}
+
+# Load movie poster data
+posters.files <- list.files()
+
+# Explore with 1000 posters split into train and test
+posters <- sample(posters.files, 800, replace = F)
+posters.train <- posters[1:400]
+posters.test <- posters[401:800]
+
+# Create ID variable to train and test
+train_id <- c()
+for(file in posters.train){
+  # Extract ID from file name
+  id <- gsub("-.*$", "", file)
+  # Append to train id column
+  train_id <- c(train_id, id)
+}
+
+test_id <- c()
+for(file in posters.test){
+  # Extract ID from file name
+  id <- gsub("-.*$", "", file)
+  # Append to test id column
+  test_id <- c(test_id, id)
+}
+
+# Load the images identified by train and test
+posters.train.imgs <- lapply(posters.train, load.image)
+posters.test.imgs <- lapply(posters.test, load.image)
+
+# Make all images same dimensions
+min.width <- min(sapply(posters.train.imgs, function(x) dim(x)[1]))
+min.height <- min(sapply(posters.train.imgs, function(x) dim(x)[2]))
+
+posters.train.imgs <- lapply(posters.train.imgs,
+                            resize,
+                            size_x = min.width,
+                            size_y = min.height)
+
+# Make test images same dimension as train
+posters.test.imgs <- lapply(posters.test.imgs,
+                             resize,
+                             size_x = min.width,
+                             size_y = min.height)
+
+# Make grayscale and vectorize
+posters.train.imgs <- lapply(posters.train.imgs, grayscale)
+posters.test.imgs <- lapply(posters.test.imgs, grayscale)
+
+posters.mat.train <- do.call(rbind,
+                              lapply(posters.train.imgs, function(x) as.vector(x[ , , 1, 1])))
+
+posters.mat.test <- do.call(rbind,
+                             lapply(posters.test.imgs, function(x) as.vector(x[ , , 1, 1])))
+
+
+```
+
+```{r pca}
+
+## Apply PCA to training data
+posters.pca.train <- prcomp(posters.mat.train, scale = T, center = T)
+
+# Isolate 90% of variance
+PCA_90 <- min(which(summary(posters.pca.train)$importance["Cumulative Proportion", ] > 0.90))
+
+# Train matrix
+posters.pca.train.90 <- posters.pca.train$x[ , 1:PCA_90]
+
+## Apply PCA rotation to test data
+posters.pca.test <- posters.mat.test %*% posters.pca.train$rotation
+posters.pca.test.90 <- posters.pca.test[ , 1:PCA_90]
+
+# Add IDs....
+posters.pca.train.90 <- data.frame(cbind(train_id, posters.pca.train.90))
+colnames(posters.pca.train.90)[1] <- "id"
+posters.pca.test.90 <- data.frame(cbind(test_id, posters.pca.test.90))
+colnames(posters.pca.test.90)[1] <- "id"
+
+# ... and genre category
+meta_data <- read.csv("/Users/James/Documents/Spring 2017/Data Science/Final project/Milestone 3/combined_data_clean.csv")
+meta_data <- meta_data[ , c("id", "genre")]
+
+# This may drop some observations if ID not in metadata
+posters.pca.train.90 <- merge(posters.pca.train.90, meta_data, by = "id")
+posters.pca.test.90 <- merge(posters.pca.test.90, meta_data, by = "id")
+
+```
+
+
+```{r SVM rbf}
+
+# Fit SVM...
+
+## Radial kernel
+svm.train.rad <- tune(svm, 
+                  factor(genre) ~ . - id,
+                  kernel = "radial",
+                  ranges = list(gamma = 10^(-3:0), cost = seq(1, 20, 4)),
+                  data = posters.pca.train.90)
+
+svm.test.rad.pred <- predict(svm.train.rad$best.model, newdata = posters.pca.test.90)
+
+# ... and generate accuracy on testing set
+svm.test.rad.acc <- mean(as.character(svm.test.rad.pred) == as.character(posters.pca.test.90$genre))
+
+# Print accuracy statistics
+print(svm.test.rad.acc)
+print(svm.train.rad$best.performance)
+
+# Examine predictions
+print(svm.test.rad.pred)
+print(posters.pca.test.90$genre)
+
+```
+
+```{r SVM linear}
+
+## Linear kernel
+svm.train <- tune(svm, 
+                  factor(genre) ~ . - id,
+                  kernel = "linear",
+                  ranges = list(cost = seq(1, 20, 4)),
+                  data = posters.pca.train.90)
+
+svm.test.pred <- predict(svm.train$best.model, newdata = posters.pca.test.90)
+
+# ... and generate accuracy on testing set
+svm.test.acc <- mean(as.character(svm.test.pred) == as.character(posters.pca.test.90$genre))
+
+# Print accuracy statistics
+print(svm.test.acc)
+print(svm.train$best.performance)
+
+# Examine predictions
+print(svm.test.pred)
+print(posters.pca.test.90$genre)
+
+```
+
+
+```{r graphs}
+
+## Apply multi-dimensional scaling
+posters.euc <- daisy(posters.mat.train)
+posters.mds <- data.frame(cmdscale(posters.euc))
+
+# Plot MDS
+print(
+  ggplot(posters.mds, aes(x = X1, y = X2)) +
+    geom_point() +
+    ggtitle("Multidimensional scaling") +
+    theme(plot.title = element_text(hjust = 0.5))
+)
+
+# Plot PCA
+print(
+  ggplot(data.frame(posters.pca.train$x), aes(x = PC1, y = PC2)) +
+    geom_point() +
+    ggtitle("PCA") +
+    theme(plot.title = element_text(hjust = 0.5))
+)
+
+```
