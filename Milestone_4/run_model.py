@@ -40,7 +40,7 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 
 	tensorboard = TensorBoard(log_dir='logs/model_'+tb_marker, histogram_freq=1, write_graph=True, write_images=False)
 
-	history = model.fit(X_train, y_train, validation_split = 0.2, batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard])
+	history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard])
 
 	# once training is complete, let's see how well we have done
 	score = model.evaluate(X_test, y_test, verbose=0)
