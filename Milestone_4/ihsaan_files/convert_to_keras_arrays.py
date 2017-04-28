@@ -8,13 +8,20 @@ from keras.utils import np_utils
 
 POSTER_PREFIX_PATH = 'posters/'
 
-def create_keras_array(df, img_height, img_width):
+def create_keras_image_array(df, img_height, img_width):
 	poster_array = []
 	for i, value in df['poster'].iteritems():
 		if len(value.shape) < 3:
 			value = np.resize(value, (value.shape[0], value.shape[1], 3))
 		poster_array.append(value)
 	return np.asarray(poster_array)
+
+def create_keras_metadata_array(df_original, df_poster):
+	df_poster = df_poster.drop('genre', axis = 1)
+	df_combined = df_poster.merge(df_original, how = 'left', on = 'id')
+	df_combined = df_combined.drop(['poster', 'genre', 'id', 'poster_path', 'pp'], axis = 1)
+	df_combined = df_combined.astype(float)
+	return df_combined.as_matrix()
 
 def encode_outcomes(genres):
 	encoder = LabelEncoder()
@@ -48,7 +55,7 @@ def convert_image_to_matrix(train_filepath, test_filepath, img_height, img_width
 	poster_test = test_df['poster_path'].apply(lambda x: convert_jpg_array(x, img_height, img_width))
 
 	# train - recombine genres and posters, filtering out any null poster values
-	poster_train_df = train_df[['genre']]
+	poster_train_df = train_df[['genre', 'id']]
 	poster_train_df['poster'] = poster_train
 	poster_train_df = poster_train_df[poster_train_df['poster'].notnull()]
 	#remove  weird 4-d array
@@ -57,7 +64,7 @@ def convert_image_to_matrix(train_filepath, test_filepath, img_height, img_width
 	poster_train_df = poster_train_df.drop('poster_dimension', axis = 1)
 
 	# test - recombine genres and posters, filtering out any null poster values
-	poster_test_df = test_df[['genre']]
+	poster_test_df = test_df[['genre', 'id']]
 	poster_test_df['poster'] = poster_test
 	poster_test_df = poster_test_df[poster_test_df['poster'].notnull()]
 	#remove  weird 4-d array
@@ -70,11 +77,17 @@ def convert_image_to_matrix(train_filepath, test_filepath, img_height, img_width
 	print('Pre-Encode Test Shape {0}'.format(test_df.shape))
 	print('Post-Encode Test Shape {0}'.format(poster_test_df.shape))
 
-	X_train = create_keras_array(poster_train_df, img_height, img_width)
-	X_test = create_keras_array(poster_test_df, img_height, img_width)
+	X_train_images = create_keras_image_array(poster_train_df, img_height, img_width)
+	X_test_images = create_keras_image_array(poster_test_df, img_height, img_width)
 
-	print('X Train Shape: {0}'.format(X_train.shape))
-	print('X Test Shape: {0}'.format(X_test.shape))
+	print('X Train Images Shape: {0}'.format(X_train_images.shape))
+	print('X Test Images Shape: {0}'.format(X_test_images.shape))
+
+	X_train_metadata = create_keras_metadata_array(train_df, poster_train_df)
+	X_test_metadata = create_keras_metadata_array(test_df, poster_test_df)
+
+	print('X Train Metadata Shape: {0}'.format(X_train_metadata.shape))
+	print('X Test Metadata Shape: {0}'.format(X_test_metadata.shape))
 
 	y_train = encode_outcomes(poster_train_df['genre'])
 	y_test = encode_outcomes(poster_test_df['genre'])
@@ -82,9 +95,11 @@ def convert_image_to_matrix(train_filepath, test_filepath, img_height, img_width
 	print('Y Train Shape: {0}'.format(y_train.shape))
 	print('Y Test Shape: {0}'.format(y_test.shape))
 
-	np.save('train_predictor_keras', X_train)
+	np.save('train_predictor_image_keras', X_train_images)
+	np.save('train_predictor_metadata_keras', X_train_metadata)
 	np.save('train_outcome_keras', y_train)
-	np.save('test_predictor_keras', X_test)
+	np.save('test_predictor_image_keras', X_test_images)
+	np.save('test_predictor_metadata_keras', X_test_metadata)
 	np.save('test_outcome_keras', y_test)
 
 	print('Complete')
