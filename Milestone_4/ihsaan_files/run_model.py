@@ -25,20 +25,20 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 	model = Sequential()
 
 	# --- input layer ---
-	model.add(Conv2D(8, kernel_size=(3, 3), activation='relu', input_shape=X_train.shape[1:]))
+	model.add(Conv2D(16, kernel_size=(3, 3), activation='relu', input_shape=X_train.shape[1:]))
 	# --- max pool ---
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 
-	model.add(Conv2D(16, kernel_size=(3, 3), activation='relu'))
-	model.add(Conv2D(16, kernel_size=(3, 3), activation='relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-
 	model.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
 	model.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 
 	model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
 	model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+
+	model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+	model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
 	model.add(MaxPooling2D(pool_size=(2, 2)))	
 	
 	# flatten for fully connected classification layer
@@ -46,7 +46,7 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 	# note that the 10 is the number of classes we have
 	# the classes are mutually exclusive so softmax is a good choice
 	# --- fully connected layer ---
-	model.add(Dense(256, activation='relu'))
+	model.add(Dense(512, activation='relu'))
 	model.add(Dropout(0.5))
 	model.add(Dense(64, activation='relu'))
 	model.add(Dropout(0.5))
