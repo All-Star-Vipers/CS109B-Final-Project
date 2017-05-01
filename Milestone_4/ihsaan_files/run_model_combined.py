@@ -41,9 +41,12 @@ def run_model(X_train_image_filepath, X_test_image_filepath, X_train_metadata_fi
 	image_branch.add(Flatten())
 	image_branch.add(Dense(512, activation='relu'))
 	image_branch.add(Dropout(0.5))
+	image_branch.add(Dense(256, activation='relu'))
+	image_branch.add(Dropout(0.5))
+	image_branch.add(Dense(128, activation='relu'))
+	image_branch.add(Dropout(0.5))
 	image_branch.add(Dense(64, activation='relu'))
 	image_branch.add(Dropout(0.5))
-
 	# use MLP for metadata
 	metadata_branch = Sequential()
 	metadata_branch.add(Dense(8, activation='relu', input_shape=(X_train_metadata.shape[1],)))

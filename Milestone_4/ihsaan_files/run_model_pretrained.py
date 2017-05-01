@@ -22,7 +22,7 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 	model_number = str(max(model_number) + 1) + '_pretrained'
 
 
-	base_model = VGG16(weights='imagenet', include_top=False, input_shape=(150, 100, 3))
+	base_model = VGG16(weights='imagenet', include_top=False, input_shape=(X_train.shape[1:]))
 	
 	# remove layers so that gpu doesn't run out of memory
 	#layers_to_remove = 15
@@ -37,8 +37,6 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 	custom_model = Flatten()(custom_model)
 	custom_model = Dense(512, activation='relu')(custom_model)
 	custom_model = Dropout(0.5)(custom_model)
-	custom_model = Dense(256, activation='relu')(custom_model)
-	custom_model = Dropout(0.5)(custom_model)
 	custom_model = Dense(64, activation='relu')(custom_model)
 	custom_model = Dropout(0.5)(custom_model)
 	custom_model = Dense(y_train.shape[1], activation='softmax')(custom_model)
@@ -46,8 +44,10 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 	model = Model(input=base_model.input, output=custom_model)
 	# prints out a summary of the model architecture
 
-	for layer in base_model.layers:
+	for layer in base_model.layers[:15]:
 		layer.trainable = False
+	for layer in base_model.layers[15:]:
+		layer.trainable = True
 	
 	print(model.summary())
 
