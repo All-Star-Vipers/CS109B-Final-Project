@@ -90,4 +90,6 @@ class_names = ['1','2','3','4','5','6','7','8','9','10'] #fix this when we know 
 plt.figure()
 plot_confusion_matrix(cnf_matrix, classes=class_names,
                       title='Confusion matrix, of genre classifications')
+plt.show(block = True)
+
 
