@@ -47,14 +47,14 @@ If you want to change the actual structure of the network, edit the *run_model_p
 ## Output Files
 
 Tensorboard logs are in the *logs* folder and can be accessed by the following command in terminal:
-```
+
 tensorboard --logdir=<logs_folder_directory>
 ```
 
 Predictions for networks that ran to completion can be found in the *predictions* folder
 ## Confusion Matrix
 To computer and visualize a confusion matrix, use confusion_matrix.py and give the filepaths of your y_test and y_prediction
-'''
+```
 python confusion_matrix.py <y_test_filepathy.npy> <y_prediction_filepath.npy>
-'''
+```
 
