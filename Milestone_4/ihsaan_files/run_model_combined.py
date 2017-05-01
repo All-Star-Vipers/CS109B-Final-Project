@@ -72,7 +72,7 @@ def run_model(X_train_image_filepath, X_test_image_filepath, X_train_metadata_fi
 	early_stopping = EarlyStopping(monitor='val_loss', patience = 50)
 	tensorboard = TensorBoard(log_dir='logs/model_'+model_number, histogram_freq=1, write_graph=True, write_images=False)
 
-	history = model.fit([X_train_image, X_train_metadata], y_train, validation_data=([X_test_image, X_test_metadata], y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard, early_stopping])
+	history = model.fit([X_train_image, X_train_metadata], y_train, class_weight='auto', validation_data=([X_test_image, X_test_metadata], y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard, early_stopping])
 
 	# once training is complete, let's see how well we have done
 	train_predictions = model.predict([X_train_image, X_train_metadata])
