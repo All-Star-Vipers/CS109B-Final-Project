@@ -47,7 +47,7 @@ If you want to change the actual structure of the network, edit the *run_model_p
 ## Output Files
 
 Tensorboard logs are in the *logs* folder and can be accessed by the following command in terminal:
-
+```
 tensorboard --logdir=<logs_folder_directory>
 ```
 
