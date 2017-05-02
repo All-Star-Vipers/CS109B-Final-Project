@@ -41,9 +41,12 @@ def run_model(X_train_image_filepath, X_test_image_filepath, X_train_metadata_fi
 	image_branch.add(Flatten())
 	image_branch.add(Dense(512, activation='relu'))
 	image_branch.add(Dropout(0.5))
+	image_branch.add(Dense(256, activation='relu'))
+	image_branch.add(Dropout(0.5))
+	image_branch.add(Dense(128, activation='relu'))
+	image_branch.add(Dropout(0.5))
 	image_branch.add(Dense(64, activation='relu'))
 	image_branch.add(Dropout(0.5))
-
 	# use MLP for metadata
 	metadata_branch = Sequential()
 	metadata_branch.add(Dense(8, activation='relu', input_shape=(X_train_metadata.shape[1],)))
@@ -72,7 +75,7 @@ def run_model(X_train_image_filepath, X_test_image_filepath, X_train_metadata_fi
 	early_stopping = EarlyStopping(monitor='val_loss', patience = 50)
 	tensorboard = TensorBoard(log_dir='logs/model_'+model_number, histogram_freq=1, write_graph=True, write_images=False)
 
-	history = model.fit([X_train_image, X_train_metadata], y_train, validation_data=([X_test_image, X_test_metadata], y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard, early_stopping])
+	history = model.fit([X_train_image, X_train_metadata], y_train, class_weight='auto', validation_data=([X_test_image, X_test_metadata], y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard, early_stopping])
 
 	# once training is complete, let's see how well we have done
 	train_predictions = model.predict([X_train_image, X_train_metadata])

@@ -19,14 +19,12 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 
 	model_number = os.listdir('./logs')
 	model_number = [int(model.split('_')[1]) for model in model_number]
-	model_number = str(max(model_number) + 1)
+	model_number = str(max(model_number) + 1) + '_image'
 
 	# create an empty network model
 	model = Sequential()
 
-	# --- input layer ---
 	model.add(Conv2D(16, kernel_size=(3, 3), activation='relu', input_shape=X_train.shape[1:]))
-	# --- max pool ---
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 
 	model.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
@@ -39,17 +37,18 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 
 	model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
 	model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))	
-	
-	# flatten for fully connected classification layer
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+
 	model.add(Flatten())
-	# note that the 10 is the number of classes we have
-	# the classes are mutually exclusive so softmax is a good choice
-	# --- fully connected layer ---
 	model.add(Dense(512, activation='relu'))
+	model.add(Dropout(0.5))
+	model.add(Dense(256, activation='relu'))
+	model.add(Dropout(0.5))
+	model.add(Dense(128, activation='relu'))
 	model.add(Dropout(0.5))
 	model.add(Dense(64, activation='relu'))
 	model.add(Dropout(0.5))
+	#model.add(Dropout(0.5))
 	# --- classification ---
 	model.add(Dense(y_train.shape[1], activation='softmax'))
 
@@ -63,7 +62,7 @@ def run_model(X_train_filepath, X_test_filepath, y_train_filepath, y_test_filepa
 	early_stopping = EarlyStopping(monitor='val_loss', patience = 10)
 	tensorboard = TensorBoard(log_dir='logs/model_'+model_number, histogram_freq=1, write_graph=True, write_images=False)
 
-	history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard, early_stopping])
+	history = model.fit(X_train, y_train, class_weight='auto', validation_data=(X_test, y_test), batch_size=int(batch_size), epochs=int(epochs), verbose=1, callbacks = [reduce_lr, tensorboard, early_stopping])
 
 	# once training is complete, let's see how well we have done
 	train_predictions = model.predict(X_train)
