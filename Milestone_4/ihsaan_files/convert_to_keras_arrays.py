@@ -6,7 +6,7 @@ import  sys
 from sklearn.preprocessing import LabelEncoder
 from keras.utils import np_utils
 
-POSTER_PREFIX_PATH = 'posters/'
+POSTER_PREFIX_PATH = '../poster_images/'
 
 def create_keras_image_array(df, img_height, img_width):
 	poster_array = []
