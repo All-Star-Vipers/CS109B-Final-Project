@@ -15,4 +15,5 @@
 * **detailed_movie_data_imdb** has the IMDb movie details for all of the movies
 * **detailed_movie_data_tmdb** has the TMDb movie details for all of the movies
 * **popular_movie_data_tmdb** has the TMDb movie details provided by the TMDb popular movies api for all of the movies. It is less detailed than the other data file and does not include the `imdb_id`
-* **tmdb_genre_encoding** is a file with the encoding of TMDb genres for each movie
+* **tmdb_genre_encoding** is a file with the encoding of TMDb genres for each movie  
+
