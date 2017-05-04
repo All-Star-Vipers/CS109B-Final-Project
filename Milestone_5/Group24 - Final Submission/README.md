@@ -29,4 +29,4 @@ Our submission was incomplete due to delays in getting working deep learning mod
 
 ## Datasets
 
-Includes the training and test sets, which together total 11,500+ records. We did not include the actual posters due to their large size, however the poster paths are in the dataset and all posters can be found in this [Dropbox folder](https://www.dropbox.com/sh/ns6ghyg1br4z592/AADgwfXDS4kHjQeFoCjvn1Jga?dl=0)
+Includes the training and test sets used for all of the models, which together total 11,500+ records. We did not include the actual posters due to their large size, however the poster paths are in the dataset and all posters can be found in this [Dropbox folder](https://www.dropbox.com/sh/ns6ghyg1br4z592/AADgwfXDS4kHjQeFoCjvn1Jga?dl=0). In addition, there were many intermediate datasets, which needed to be parsed and transformed to arrive at these final sets, all of which can be found on the github repo.
